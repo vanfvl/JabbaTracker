@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-
-import Login from '../containers/login';
+import Header from './header';
 
 export default class App extends Component {
   render() {
     return (
       <div>
-        <Login />
+        <Header/>
+
+        { this.props.children }
       </div>
     );
   }
