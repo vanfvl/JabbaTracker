@@ -11,7 +11,8 @@ class NewAccountInput extends Component {
       accountNumber: '',
       clientName: '',
       matterTitle: '',
-      items:[]
+      items:[],
+      selectedIds:[]
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -62,6 +63,11 @@ class NewAccountInput extends Component {
         items: newState
       })
     })
+  }
+
+  removeItem(itemId) {
+    const itemRef = firebase.database().ref(`/items/${itemId}`);
+    itemRef.remove();
   }
 
   render() {
@@ -121,7 +127,31 @@ class NewAccountInput extends Component {
             {this.state.items.map((item)=> {
               return (
                 <tr key={item.id}>
-                  <th>#</th>
+                  <th><div className="checkbox">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={this.state.selectedIds.indexOf(item.id) !== -1}
+                        onChange={()=>{
+                          /*
+                           * onChange gets called everytime the checkbox is clicked.
+                           * We check if the key is in the array already, add if not, delete if yes.
+                           */
+                          let tempArray = this.state.selectedIds;
+
+                          if (this.state.selectedIds.indexOf(item.id) !== -1) {
+                            tempArray.splice(this.state.selectedIds.indexOf(item.id), 1);
+                          } else {
+                            tempArray.push(item.id);
+                          }
+
+                          this.setState({
+                            selectedIds: tempArray
+                          });
+                        }}
+                      />
+                    </label>
+                  </div></th>
                   <td>{item.accountName}</td>
                   <td>{item.accountNumber}</td>
                   <td>{item.clientName}</td>
@@ -131,6 +161,13 @@ class NewAccountInput extends Component {
             })}
             </tbody>
           </table>
+          <button onClick={()=>{
+            this.state.selectedIds.forEach((item)=>{
+              this.removeItem(item);
+            });
+            this.setState({selectedIds:[]})
+
+          }}>Delete</button>
         </div>
       </div>
     )
