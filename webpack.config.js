@@ -1,18 +1,21 @@
+var path = require("path");
+
 module.exports = {
   entry: [
     './src/index.js'
   ],
   output: {
-    path: __dirname,
-    publicPath: '/',
-    filename: 'bundle.js'
+    path: path.resolve(__dirname, 'public/js'),
+    publicPath: '/js/',
+    filename: 'bundle.js',
   },
   module: {
     loaders: [{
       exclude: /node_modules/,
       loader: 'babel',
       query: {
-        presets: ['react', 'es2015', 'stage-1']
+        presets: ['react', 'es2015', 'stage-1'],
+        plugins: ['styled-jsx/babel']
       }
     }]
   },
@@ -21,6 +24,7 @@ module.exports = {
   },
   devServer: {
     historyApiFallback: true,
-    contentBase: './'
-  }
+    contentBase: './',
+    host: '0.0.0.0',
+  },
 };
