@@ -11,7 +11,7 @@ class NewAccountInput extends Component {
       accountNumber: '',
       clientName: '',
       matterTitle: '',
-      items: [],
+      accounts: [],
       selectedIds: [],
       editMode: false,
       editId: ''
@@ -35,14 +35,14 @@ class NewAccountInput extends Component {
     //we need to prevent the default behavior of the form, which if we don't will cause
     // the page to refresh when you hit the submit button.
     e.preventDefault();
-    const itemsRef = firebase.database().ref('items');
-    const item = {
+    const accountsRef = firebase.database().ref('accounts');
+    const account = {
       accountName: this.state.accountName,
       accountNumber: this.state.accountNumber,
       clientName: this.state.clientName,
       matterTitle: this.state.matterTitle
     };
-    itemsRef.push(item);
+    accountsRef.push(account);
     this.setState({
       accountName: '',
       accountNumber: '',
@@ -54,43 +54,39 @@ class NewAccountInput extends Component {
 
   handleEdit(e) {
     e.preventDefault();
-    const itemRef = firebase.database().ref(`/items/${this.state.editId}`);
-    itemRef.set({
+    const accountRef = firebase.database().ref(`/accounts/${this.state.editId}`);
+    accountRef.set({
       accountName: this.state.accountName,
       accountNumber: this.state.accountNumber,
       clientName: this.state.clientName,
       matterTitle: this.state.matterTitle
     }, this.toggleEdit);
-    //look for selected id in items
-
-    //delete item
-    // push new item
   }
 
   componentDidMount() {
-    const itemsRef = firebase.database().ref('items');
-    itemsRef.on('value', (snapshot)=> {
-      let items = snapshot.val();
+    const accountsRef = firebase.database().ref('accounts');
+    accountsRef.on('value', (snapshot)=> {
+      let accounts = snapshot.val();
       let newState = [];
-      for (let item in items) {
+      for (let account in accounts) {
         newState.push({
-          id: item,
-          accountName: items[item].accountName,
-          accountNumber: items[item].accountNumber,
-          clientName: items[item].clientName,
-          matterTitle: items[item].matterTitle
+          id: account,
+          accountName: accounts[account].accountName,
+          accountNumber: accounts[account].accountNumber,
+          clientName: accounts[account].clientName,
+          matterTitle: accounts[account].matterTitle
 
         });
       }
       this.setState({
-        items: newState
+        accounts: newState
       })
     })
   }
 
-  removeItem(itemId) {
-    const itemRef = firebase.database().ref(`/items/${itemId}`);
-    itemRef.remove();
+  removeItem(accountId) {
+    const accountRef = firebase.database().ref(`/accounts/${accountId}`);
+    accountRef.remove();
   }
 
   toggleEdit() {
@@ -99,10 +95,10 @@ class NewAccountInput extends Component {
     }, () => {
       if(this.state.editMode) {
         this.state.editId = this.state.selectedIds[0];
-        const findId = (item) => {
-          return item.id === this.state.editId;
+        const findId = (account) => {
+          return account.id === this.state.editId;
         };
-        let tempItem = this.state.items.find(findId);
+        let tempItem = this.state.accounts.find(findId);
 
         this.setState({
           accountName: tempItem.accountName,
@@ -178,14 +174,14 @@ class NewAccountInput extends Component {
               </tr>
             </thead>
             <tbody>
-            {this.state.items.map((item)=> {
+            {this.state.accounts.map((account)=> {
               return (
-                <tr key={item.id}>
+                <tr key={account.id}>
                   <th><div className="checkbox">
                     <label>
                       <input
                         type="checkbox"
-                        checked={this.state.selectedIds.indexOf(item.id) !== -1}
+                        checked={this.state.selectedIds.indexOf(account.id) !== -1}
                         onChange={()=>{
                           /*
                            * onChange gets called everytime the checkbox is clicked.
@@ -193,10 +189,10 @@ class NewAccountInput extends Component {
                            */
                           let tempArray = this.state.selectedIds;
 
-                          if (this.state.selectedIds.indexOf(item.id) !== -1) {
-                            tempArray.splice(this.state.selectedIds.indexOf(item.id), 1);
+                          if (this.state.selectedIds.indexOf(account.id) !== -1) {
+                            tempArray.splice(this.state.selectedIds.indexOf(account.id), 1);
                           } else {
-                            tempArray.push(item.id);
+                            tempArray.push(account.id);
                           }
 
                           this.setState({
@@ -206,10 +202,10 @@ class NewAccountInput extends Component {
                       />
                     </label>
                   </div></th>
-                  <td>{item.accountName}</td>
-                  <td>{item.accountNumber}</td>
-                  <td>{item.clientName}</td>
-                  <td>{item.matterTitle}</td>
+                  <td>{account.accountName}</td>
+                  <td>{account.accountNumber}</td>
+                  <td>{account.clientName}</td>
+                  <td>{account.matterTitle}</td>
                 </tr>
               )
             })}
@@ -217,8 +213,8 @@ class NewAccountInput extends Component {
           </table>
           <button onClick={() => {this.toggleEdit()}}>{ this.state.editMode ? "Cancel" : "Edit" }</button>
           <button onClick={()=>{
-            this.state.selectedIds.forEach((item)=>{
-              this.removeItem(item);
+            this.state.selectedIds.forEach((account)=>{
+              this.removeItem(account);
             });
             this.setState({selectedIds:[]})
 
