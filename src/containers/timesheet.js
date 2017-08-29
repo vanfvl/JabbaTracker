@@ -9,12 +9,14 @@ class TimeSheet extends Component {
     this.state = {
       entries: [],
       accounts: {}
-    }
+    };
+
+    this.entriesRef = firebase.database().ref('entries');
+    this.accountsRef = firebase.database().ref('projects');
   }
 
   componentDidMount() {
-    const entriesRef = firebase.database().ref('entries');
-    entriesRef.on('value', (snapshot) => {
+    this.entriesRef.on('value', (snapshot) => {
       const items = snapshot.val();
       let entries = [];
       const { accounts } = this.state;
@@ -37,8 +39,7 @@ class TimeSheet extends Component {
       this.setState({entries});
     });
 
-    const accountsRef = firebase.database().ref('projects');
-    accountsRef.on('value', (snapshot) => {
+    this.accountsRef.on('value', (snapshot) => {
       const accounts = snapshot.val();
       const { entries } = this.state;
 
@@ -58,6 +59,11 @@ class TimeSheet extends Component {
       else
         this.setState({accounts});
     });
+  }
+
+  componentWillUnmount() {
+    this.entriesRef.off();
+    this.accountsRef.off();
   }
 
   render() {

@@ -20,6 +20,9 @@ export default class SortHeaderCell extends React.Component {
         <a onClick={this._onSortChange}>
           {children} {sortDir ? (sortDir === SortTypes.DESC ? '↓' : '↑') : ''}
         </a>
+        <style jsx>{`
+          a { cursor: pointer; }
+        `}</style>
       </Cell>
     );
   }
