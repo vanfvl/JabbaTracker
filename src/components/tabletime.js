@@ -6,6 +6,7 @@ import DataWrapper from './DataTable/dataWrapper';
 import SortHeaderCell from './DataTable/sortHeaderCell';
 import { TextCell } from './DataTable/cells';
 import moment from 'moment';
+import firebase from '../firebase';
 
 export default class TableTime extends Component {
   constructor(props) {
@@ -60,6 +61,7 @@ export default class TableTime extends Component {
     this.setState({
       sortedDataList: this._dataList,
       colSortDirs: {},
+      selectedIds: []
     });
   }
 
@@ -96,6 +98,37 @@ export default class TableTime extends Component {
     });
   }
 
+  logEntries(logged = true) {
+    if (this.state.selectedIds.length === 0) return false;
+
+    this.state.selectedIds.forEach(id => {
+      const ref = firebase.database().ref(`entries/${id}`);
+      const entry = this.props.entries.find(item => item.id === id);
+
+      if (entry) {
+        ref.set({
+          account: entry.account,
+          createdAt: entry.createdAt,
+          createdBy: entry.createdBy,
+          date: entry.date,
+          description: entry.description,
+          duration: entry.duration,
+          logged
+        });
+      }
+    });
+  }
+
+  deleteEntries() {
+    if (this.state.selectedIds.length === 0) return false;
+
+    this.state.selectedIds.forEach(id => firebase.database().ref(`entries/${id}`).remove());
+
+    this.setState({
+      selectedIds: []
+    });
+  }
+
   render() {
     var {sortedDataList, colSortDirs} = this.state;
     return (
@@ -103,8 +136,30 @@ export default class TableTime extends Component {
         <div className="row">
           <div className="col-xs-12">
             <div className="btn-group" role="group">
-              <button type="button" className="btn btn-default">Log</button>
-              <button type="button" className="btn btn-default">Unlog</button>
+              <button
+                type="button"
+                className="btn btn-default"
+                onClick={() => this.logEntries(true)}
+              >
+                Log
+              </button>
+              <button
+                type="button"
+                className="btn btn-default"
+                onClick={() => this.logEntries(false)}
+              >
+                Unlog
+              </button>
+            </div>
+            <div className="btn-group" role="group">
+              <button type="button" className="btn btn-default">Edit</button>
+              <button
+                type="button"
+                className="btn btn-default"
+                onClick={() => this.deleteEntries()}
+              >
+                Delete
+              </button>
             </div>
             <div className="btn-group" role="group">
               <button
