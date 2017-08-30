@@ -12,7 +12,7 @@ class TimeSheet extends Component {
     };
 
     this.entriesRef = firebase.database().ref('entries');
-    this.accountsRef = firebase.database().ref('projects');
+    this.accountsRef = firebase.database().ref('accounts');
   }
 
   componentDidMount() {
@@ -28,9 +28,9 @@ class TimeSheet extends Component {
         };
 
         if (accounts[items[key].account]) {
-          item.accountNumber = accounts[items[key].account].number;
+          item.accountNumber = accounts[items[key].account].accountNumber;
           item.clientName = accounts[items[key].account].clientName;
-          item.matterName = accounts[items[key].account].matterName;
+          item.matterTitle = accounts[items[key].account].matterTitle;
         }
 
         entries.push(item);
@@ -48,9 +48,9 @@ class TimeSheet extends Component {
       entries.forEach(item => {
         newEntries.push({
           ...item,
-          accountNumber: accounts[item.account].number,
+          accountNumber: accounts[item.account].accountNumber,
           clientName: accounts[item.account].clientName,
-          matterName: accounts[item.account].matterName,
+          matterTitle: accounts[item.account].matterTitle,
         })
       });
 

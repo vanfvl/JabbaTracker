@@ -244,11 +244,11 @@ export default class TableTime extends Component {
             width={200}
           />
           <Column
-            columnKey="matterName"
+            columnKey="matterTitle"
             header={
               <SortHeaderCell
                 onSortChange={this._onSortChange}
-                sortDir={colSortDirs.matterName}>
+                sortDir={colSortDirs.matterTitle}>
                 Matter Title
               </SortHeaderCell>
             }

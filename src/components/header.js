@@ -22,6 +22,9 @@ export default class Header extends Component {
               <li className={ this.props.location.pathname === '/timesheet' && 'active' }>
                 <Link to="/timesheet">Time Sheet</Link>
               </li>
+              <li className={ this.props.location.pathname === '/input' && 'active' }>
+                <Link to="/input">Input</Link>
+              </li>
               <li className={ this.props.location.pathname === '/accounts' && 'active' }>
                 <Link to="/accounts">Accounts</Link>
               </li>
