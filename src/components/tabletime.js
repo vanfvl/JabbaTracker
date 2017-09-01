@@ -108,8 +108,8 @@ export default class TableTime extends Component {
       if (entry) {
         ref.set({
           account: entry.account,
-          createdAt: entry.createdAt,
-          createdBy: entry.createdBy,
+          // createdAt: entry.createdAt,
+          // createdBy: entry.createdBy,
           date: entry.date,
           description: entry.description,
           duration: entry.duration,
@@ -325,6 +325,7 @@ export default class TableTime extends Component {
             }
             cell={({rowIndex, ...props}) => (
               <Cell
+                style={{ backgroundColor: sortedDataList.getObjectAt(rowIndex).logged ? '#D6FFAA' : '' }}
                 {...props}
               >
                 {sortedDataList.getObjectAt(rowIndex).logged ? 'Logged' : 'Not Logged'}

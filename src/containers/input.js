@@ -66,9 +66,9 @@ class Input extends Component {
 
     for (let i = 0; i < NUMBER_OF_ROWS; i++) {
       formValues.push({
-        year: '',
-        month: '',
-        day: '',
+        year: new Date().getFullYear(),
+        month: (new Date().getMonth() + 1),
+        day: new Date().getDate(),
         errorDate: '',
         accountName: '',
         account: null,
@@ -99,6 +99,12 @@ class Input extends Component {
     });
   }
 
+  handleReturn(e) {
+    if (e.keyCode == '13') {
+      this.handleSubmit();
+    }
+  }
+
   findAccountByName(accountName) {
     return this.state.accounts.find((item) => item.accountName === accountName);
   }
@@ -109,9 +115,13 @@ class Input extends Component {
     let hasError = false;
 
     formValues.forEach(item => {
-      if ( item.month === '' &&
-        item.day === '' &&
-        !item.account &&
+      item.errorDate = '';
+      item.errorAccountName = '';
+      item.errorTime = '';
+      item.errorDuration = '';
+      item.errorDescription = '';
+
+      if ( !item.account &&
         item.hour === '' &&
         item.min === '' &&
         item.duration1 === '' &&
@@ -122,36 +132,26 @@ class Input extends Component {
       if ( item.month === '' || item.day === '' ) {
         item.errorDate = 'Please enter a valid date.';
         hasError = true;
-      } else {
-        item.errorDate = '';
       }
 
       if ( !item.account ) {
         item.errorAccountName = 'Please select a valid account.';
         hasError = true;
-      } else {
-        item.errorAccountName = '';
       }
 
       if ( item.hour === '' || item.min === '' ) {
         item.errorTime = 'Please enter a valid time.';
         hasError = true;
-      } else {
-        item.errorTime = '';
       }
 
       if ( item.duration1 === '' && item.duration2 === '' ) {
         item.errorDuration = 'Please enter a valid duration.';
         hasError = true;
-      } else {
-        item.errorDuration = '';
       }
 
       if ( item.description === '' ) {
         item.errorDescription = 'Please enter a description.';
         hasError = true;
-      } else {
-        item.errorDescription = '';
       }
 
       if (hasError) return false;
@@ -243,7 +243,7 @@ class Input extends Component {
         </td>
         <td className={this.state.formValues[idx].errorDescription && 'has-error'}>
           <input type="text" name="description" className="form-control description" placeholder="Description"
-                 value={this.state.formValues[idx].description} onChange={(e) => this.handleChange(idx, e)}/>
+                 value={this.state.formValues[idx].description} onChange={(e) => this.handleChange(idx, e)} onKeyDown={(e) => this.handleReturn(e)} />
           { this.state.formValues[idx].errorDescription &&
           <span className="help-block">{this.state.formValues[idx].errorDescription}</span>
           }
@@ -283,6 +283,8 @@ class Input extends Component {
   render() {
     return (
       <div>
+        <button className="btn btn-success" onClick={() => this.handleSubmit()}>Submit</button>
+
         <table className="table">
           <thead>
           <tr>
