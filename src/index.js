@@ -12,7 +12,7 @@ const createStoreWithMiddleware = applyMiddleware()(createStore);
 ReactDOM.render(
   <Provider store={createStoreWithMiddleware(reducers)}>
     <Router>
-      <Routes />
+      <Routes dahistory={'hello'} dah={Router.history} />
     </Router>
   </Provider>
   , document.querySelector('.container'));
