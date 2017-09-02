@@ -7,8 +7,13 @@ import SortHeaderCell from './DataTable/sortHeaderCell';
 import { TextCell } from './DataTable/cells';
 import moment from 'moment';
 import firebase from '../firebase';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import Snackbar from 'material-ui/Snackbar';
+import IconButton from 'material-ui/IconButton';
+import CloseIcon from 'material-ui-icons/Close';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
-export default class TableTime extends Component {
+export default class TableThemis extends Component {
   constructor(props) {
     super(props);
 
@@ -23,7 +28,8 @@ export default class TableTime extends Component {
     this.state = {
       sortedDataList: this._dataList,
       colSortDirs: {},
-      selectedIds: []
+      selectedIds: [],
+      copied: false,
     };
 
     this._onSortChange = this._onSortChange.bind(this);
@@ -129,6 +135,14 @@ export default class TableTime extends Component {
     });
   }
 
+  handleRequestClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    this.setState({ copied: false });
+  };
+
   render() {
     var {sortedDataList, colSortDirs} = this.state;
     return (
@@ -149,16 +163,6 @@ export default class TableTime extends Component {
                 onClick={() => this.logEntries(false)}
               >
                 Unlog
-              </button>
-            </div>
-            <div className="btn-group" role="group">
-              <button type="button" className="btn btn-default">Edit</button>
-              <button
-                type="button"
-                className="btn btn-default"
-                onClick={() => this.deleteEntries()}
-              >
-                Delete
               </button>
             </div>
             <div className="btn-group" role="group">
@@ -220,28 +224,16 @@ export default class TableTime extends Component {
             width={30}
           />
           <Column
-            columnKey="accountName"
+            columnKey="accountNumber"
             header={
               <SortHeaderCell
                 onSortChange={this._onSortChange}
-                sortDir={colSortDirs.accountName}>
-                Account
+                sortDir={colSortDirs.accountNumber}>
+                Account #
               </SortHeaderCell>
             }
             cell={<TextCell data={sortedDataList} />}
             width={100}
-          />
-          <Column
-            columnKey="clientName"
-            header={
-              <SortHeaderCell
-                onSortChange={this._onSortChange}
-                sortDir={colSortDirs.clientName}>
-                Client Name
-              </SortHeaderCell>
-            }
-            cell={<TextCell data={sortedDataList} />}
-            width={200}
           />
           <Column
             columnKey="matterTitle"
@@ -310,7 +302,15 @@ export default class TableTime extends Component {
                 Description
               </SortHeaderCell>
             }
-            cell={<TextCell data={sortedDataList} />}
+            cell={({rowIndex, ...props}) => (
+              <Cell
+                {...props}
+              >
+                <CopyToClipboard text={sortedDataList.getObjectAt(rowIndex).description} onCopy={() => this.setState({copied: true})}>
+                  <span style={{display: 'block'}}>{sortedDataList.getObjectAt(rowIndex).description}</span>
+                </CopyToClipboard>
+              </Cell>
+            )}
             width={200}
             flexGrow={1}
           />
@@ -334,6 +334,32 @@ export default class TableTime extends Component {
             width={80}
           />
         </Table>
+
+        <MuiThemeProvider>
+          <Snackbar
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            open={this.state.copied}
+            autoHideDuration={3e3}
+            onRequestClose={this.handleRequestClose}
+            SnackbarContentProps={{
+              'aria-describedby': 'message-id',
+            }}
+            message={<span id="message-id">Copied to clipboard.</span>}
+            action={[
+              <IconButton
+                key="close"
+                aria-label="Close"
+                color="inherit"
+                onClick={this.handleRequestClose}
+              >
+                <CloseIcon />
+              </IconButton>,
+            ]}
+          />
+        </MuiThemeProvider>
 
         <style jsx>{`
           .row { margin-bottom: 1em; }

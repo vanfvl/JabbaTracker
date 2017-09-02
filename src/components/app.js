@@ -3,6 +3,7 @@ import {Route, Match, Redirect} from 'react-router-dom';
 import Header from './header';
 import Login from '../containers/login';
 import TimeSheet from '../containers/timesheet';
+import ThemisSheet from '../containers/themissheet';
 import Input from '../containers/input';
 import AccountsTab from '../containers/AccountsTab';
 
@@ -13,6 +14,7 @@ export default class Routes extends React.Component {
         <Header />
         <Route path="/login" component={Login}/>
         <Route path="/" exact={true} component={TimeSheet}/>
+        <Route path="/themissheet" exact={true} component={ThemisSheet}/>
         <Route path="/input" component={Input}/>
         <Route path="/accounts" component={AccountsTab}/>
         <ProtectedRoute path="/protected" component={TimeSheet} />

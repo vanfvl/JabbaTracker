@@ -158,7 +158,7 @@ class Input extends Component {
 
       const entry = {
         account: item.account.id,
-        date: new Date(item.year || '2017', item.month, item.day, item.hour, item.min).getTime(),
+        date: new Date(item.year || '2017', item.month - 1, item.day, item.hour, item.min).getTime(),
         description: item.description,
         duration: `${item.duration1 || 0}.${item.duration2 || 0}`,
         logged: false

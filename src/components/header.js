@@ -31,6 +31,7 @@ export default class Header extends Component {
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav">
               { this.renderLink('/', 'Time Sheet', true) }
+              { this.renderLink('/themissheet', 'Themis Sheet') }
               { this.renderLink('/input', 'Input') }
               { this.renderLink('/accounts', 'Accounts') }
             </ul>
