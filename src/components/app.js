@@ -6,6 +6,7 @@ import TimeSheet from '../containers/timesheet';
 import ThemisSheet from '../containers/themissheet';
 import Input from '../containers/input';
 import AccountsTab from '../containers/AccountsTab';
+import Summary from '../containers/summary';
 
 export default class Routes extends React.Component {
   render() {
@@ -17,6 +18,7 @@ export default class Routes extends React.Component {
         <Route path="/themissheet" exact={true} component={ThemisSheet}/>
         <Route path="/input" component={Input}/>
         <Route path="/accounts" component={AccountsTab}/>
+        <Route path="/summary" component={Summary}/>
         <ProtectedRoute path="/protected" component={TimeSheet} />
       </div>
     )
