@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import firebase from '../firebase';
-import TableTime from '../components/tabletime';
+import TableThemis from '../components/tablethemis';
 
-class TimeSheet extends Component {
+class ThemisSheet extends Component {
   constructor(props) {
     super(props);
 
@@ -28,7 +28,6 @@ class TimeSheet extends Component {
         };
 
         if (accounts[items[key].account]) {
-          item.accountName = accounts[items[key].account].accountName;
           item.accountNumber = accounts[items[key].account].accountNumber;
           item.clientName = accounts[items[key].account].clientName;
           item.matterTitle = accounts[items[key].account].matterTitle;
@@ -51,7 +50,6 @@ class TimeSheet extends Component {
           ...item,
           accountNumber: accounts[item.account].accountNumber,
           clientName: accounts[item.account].clientName,
-          accountName: accounts[item.account].accountName,
           matterTitle: accounts[item.account].matterTitle,
         })
       });
@@ -72,11 +70,11 @@ class TimeSheet extends Component {
     return (
       <div>
         { this.state.entries.length > 0 &&
-          <TableTime entries={this.state.entries} accounts={this.state.accounts} />
+          <TableThemis entries={this.state.entries} accounts={this.state.accounts} />
         }
       </div>
     )
   }
 }
 
-export default TimeSheet;
+export default ThemisSheet;

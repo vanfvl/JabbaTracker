@@ -1,7 +1,18 @@
 import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
+import {Route} from 'react-router-dom';
 
 export default class Header extends Component {
+  renderLink(to, label, activeOnlyWhenExact) {
+    return (
+      <Route path={to} exact={activeOnlyWhenExact} children={({ match }) => (
+        <li className={ match && 'active' }>
+          <Link to={to}>{label}</Link>
+        </li>
+      )}/>
+    )
+  }
+
   render() {
     return (
       <nav className="navbar navbar-default">
@@ -14,23 +25,16 @@ export default class Header extends Component {
               <span className="icon-bar"></span>
               <span className="icon-bar"></span>
             </button>
-            <a className="navbar-brand" href="#">Jabba Tracker</a>
+            <Link className="navbar-brand" to="/">Jabba Tracker</Link>
           </div>
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav">
-              <li className={ this.props.location.pathname === '/timesheet' && 'active' }>
-                <Link to="/timesheet">Time Sheet</Link>
-              </li>
-              <li className={ this.props.location.pathname === '/input' && 'active' }>
-                <Link to="/input">Input</Link>
-              </li>
-              <li className={ this.props.location.pathname === '/accounts' && 'active' }>
-                <Link to="/accounts">Accounts</Link>
-              </li>
-              <li className={ this.props.location.pathname === '/summary' && 'active' }>
-                <Link to="/summary">Summary</Link>
-              </li>
+              { this.renderLink('/', 'Time Sheet', true) }
+              { this.renderLink('/themissheet', 'Themis Sheet') }
+              { this.renderLink('/input', 'Input') }
+              { this.renderLink('/accounts', 'Accounts') }
+              { this.renderLink('/summary', 'Summary') }
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li className="dropdown">

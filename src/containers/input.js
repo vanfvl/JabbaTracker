@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import firebase from '../firebase';
 import Autocomplete from 'react-autocomplete';
+import { Link } from 'react-router-dom';
+
+const NUMBER_OF_ROWS = 10;
 
 class Input extends Component {
   constructor(props) {
@@ -8,7 +11,8 @@ class Input extends Component {
 
     this.state = {
       formValues: [],
-      accounts: []
+      accounts: [],
+      submitted: false,
     };
 
     this.entriesRef = firebase.database().ref('entries');
@@ -58,26 +62,30 @@ class Input extends Component {
   }
 
   resetFormValues() {
-    const numberOfRows = 10;
     const formValues = [];
 
-    for (let i = 0; i < numberOfRows; i++) {
+    for (let i = 0; i < NUMBER_OF_ROWS; i++) {
       formValues.push({
-        year: '',
-        month: '',
-        day: '',
+        year: new Date().getFullYear(),
+        month: (new Date().getMonth() + 1),
+        day: new Date().getDate(),
+        errorDate: '',
         accountName: '',
         account: null,
+        errorAccountName: '',
         hour: '',
         min: '',
+        errorTime: '',
         duration1: '',
         duration2: '',
-        description: ''
+        errorDuration: '',
+        description: '',
+        errorDescription: '',
       })
     }
 
     this.setState({
-      formValues
+      formValues,
     })
   }
 
@@ -91,32 +99,84 @@ class Input extends Component {
     });
   }
 
+  handleReturn(e) {
+    if (e.keyCode == '13') {
+      this.handleSubmit();
+    }
+  }
+
   findAccountByName(accountName) {
     return this.state.accounts.find((item) => item.accountName === accountName);
   }
 
   handleSubmit() {
-    this.state.formValues.forEach(item => {
-      if ( item.month !== '' &&
-        item.day !== '' &&
-        item.account &&
-        item.hour !== '' &&
-        item.min !== '' &&
-        item.duration1 !== '' &&
-        item.description !== '' ) {
-        const entry = {
-          account: item.account.id,
-          date: new Date(item.year || '2017', item.month, item.day, item.hour, item.min).getTime(),
-          description: item.description,
-          duration: `${item.duration1}.${item.duration2}`,
-          logged: false
-        };
+    const entriesToPush = [];
+    const { formValues } = this.state;
+    let hasError = false;
 
-        this.entriesRef.push(entry);
+    formValues.forEach(item => {
+      item.errorDate = '';
+      item.errorAccountName = '';
+      item.errorTime = '';
+      item.errorDuration = '';
+      item.errorDescription = '';
+
+      if ( !item.account &&
+        item.hour === '' &&
+        item.min === '' &&
+        item.duration1 === '' &&
+        item.description === '' ) {
+        return false;
       }
+
+      if ( item.month === '' || item.day === '' ) {
+        item.errorDate = 'Please enter a valid date.';
+        hasError = true;
+      }
+
+      if ( !item.account ) {
+        item.errorAccountName = 'Please select a valid account.';
+        hasError = true;
+      }
+
+      if ( item.hour === '' || item.min === '' ) {
+        item.errorTime = 'Please enter a valid time.';
+        hasError = true;
+      }
+
+      if ( item.duration1 === '' && item.duration2 === '' ) {
+        item.errorDuration = 'Please enter a valid duration.';
+        hasError = true;
+      }
+
+      if ( item.description === '' ) {
+        item.errorDescription = 'Please enter a description.';
+        hasError = true;
+      }
+
+      if (hasError) return false;
+
+      const entry = {
+        account: item.account.id,
+        date: new Date(item.year || '2017', item.month - 1, item.day, item.hour, item.min).getTime(),
+        description: item.description,
+        duration: `${item.duration1 || 0}.${item.duration2 || 0}`,
+        logged: false
+      };
+
+      entriesToPush.push(entry);
     });
 
-    this.resetFormValues();
+    if (hasError) {
+      this.setState({formValues});
+      return false;
+    }
+
+    if (entriesToPush.length > 0) {
+      entriesToPush.forEach(entry => this.entriesRef.push(entry));
+      this.setState({submitted: true});
+      this.resetFormValues();
+    }
   }
 
   renderRows() {
@@ -131,15 +191,18 @@ class Input extends Component {
 
     return this.state.formValues.map((row, idx) => (
       <tr key={idx}>
-        <td>
+        <td className={this.state.formValues[idx].errorDate && 'has-error'}>
           <input type="text" name="year" className="form-control year" placeholder="2017"
                  value={this.state.formValues[idx].year} onChange={(e) => this.handleChange(idx, e)}/>
           <input type="text" name="month" className="form-control month" placeholder="MM"
                  value={this.state.formValues[idx].month} onChange={(e) => this.handleChange(idx, e)}/>
           <input type="text" name="day" className="form-control day" placeholder="DD"
                  value={this.state.formValues[idx].day} onChange={(e) => this.handleChange(idx, e)}/>
+          { this.state.formValues[idx].errorDate &&
+            <span className="help-block">{this.state.formValues[idx].errorDate}</span>
+          }
         </td>
-        <td>
+        <td className={this.state.formValues[idx].errorAccountName && 'has-error'}>
           <Autocomplete
             getItemValue={(item) => item.accountName}
             inputProps={{className: 'form-control'}}
@@ -156,22 +219,34 @@ class Input extends Component {
             onChange={(e, value) => this.setState({formValues: changeAccount(value, idx)}) }
             onSelect={(value) => this.setState({formValues: changeAccount(value, idx)}) }
           />
+          { this.state.formValues[idx].errorAccountName &&
+          <span className="help-block">{this.state.formValues[idx].errorAccountName}</span>
+          }
         </td>
-        <td>
+        <td className={this.state.formValues[idx].errorTime && 'has-error'}>
           <input type="text" name="hour" className="form-control time" placeholder="00"
                  value={this.state.formValues[idx].hour} onChange={(e) => this.handleChange(idx, e)}/>:
           <input type="text" name="min" className="form-control time" placeholder="00"
                  value={this.state.formValues[idx].min} onChange={(e) => this.handleChange(idx, e)}/>
+          { this.state.formValues[idx].errorTime &&
+          <span className="help-block">{this.state.formValues[idx].errorTime}</span>
+          }
         </td>
-        <td>
+        <td className={this.state.formValues[idx].errorDuration && 'has-error'}>
           <input type="text" name="duration1" className="form-control duration" placeholder="0"
                  value={this.state.formValues[idx].duration1} onChange={(e) => this.handleChange(idx, e)}/>.
           <input type="text" name="duration2" className="form-control duration" placeholder="00"
                  value={this.state.formValues[idx].duration2} onChange={(e) => this.handleChange(idx, e)}/>
+          { this.state.formValues[idx].errorDuration &&
+          <span className="help-block">{this.state.formValues[idx].errorDuration}</span>
+          }
         </td>
-        <td>
+        <td className={this.state.formValues[idx].errorDescription && 'has-error'}>
           <input type="text" name="description" className="form-control description" placeholder="Description"
-                 value={this.state.formValues[idx].description} onChange={(e) => this.handleChange(idx, e)}/>
+                 value={this.state.formValues[idx].description} onChange={(e) => this.handleChange(idx, e)} onKeyDown={(e) => this.handleReturn(e)} />
+          { this.state.formValues[idx].errorDescription &&
+          <span className="help-block">{this.state.formValues[idx].errorDescription}</span>
+          }
         </td>
 
         <style jsx>{`
@@ -187,17 +262,17 @@ class Input extends Component {
           }
 
           .year {
-            width: 38%;
+            width: 60px;
             margin-right: 2px;
           }
 
           .month {
-            width: 29%;
+            width: 50px;
             margin-right: 2px;
           }
 
           .day {
-            width: 29%;
+            width: 50px;
             margin-right: 2px;
           }
         `}</style>
@@ -208,14 +283,16 @@ class Input extends Component {
   render() {
     return (
       <div>
+        <button className="btn btn-success" onClick={() => this.handleSubmit()}>Submit</button>
+
         <table className="table">
           <thead>
           <tr>
-            <th>Date</th>
-            <th width="22%">Account Name</th>
+            <th width="190">Date</th>
+            <th>Account Name</th>
             <th width="120">Time</th>
             <th width="120">Duration</th>
-            <th width="40%">Description</th>
+            <th>Description</th>
           </tr>
           </thead>
           <tbody>
@@ -224,6 +301,16 @@ class Input extends Component {
         </table>
 
         <button className="btn btn-success" onClick={() => this.handleSubmit()}>Submit</button>
+
+        { this.state.submitted &&
+          <div className="bg-success">
+            <strong>Success!</strong> Please <Link to="/">click here</Link> to go to the Time Sheet tab.
+          </div>
+        }
+
+        <style jsx>{`
+          .bg-success { padding: 10px; margin-left: 1em; display: inline-block; }
+        `}</style>
       </div>
     )
   }

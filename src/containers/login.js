@@ -5,11 +5,9 @@ class Login extends Component {
     super(props);
 
     this.state = {
-      username: '',
+      email: '',
       password: ''
     }
-
-
   }
 
   render() {
@@ -19,8 +17,8 @@ class Login extends Component {
           <div className="form-group">
             <label htmlFor="exampleInputEmail1">Email address</label>
             <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email"
-                   onChange={(event)=>{this.setState({username: event.target.value})}}
-                   value={this.state.username}
+                   onChange={(event)=>{this.setState({email: event.target.value})}}
+                   value={this.state.email}
             />
           </div>
           <div className="form-group">
@@ -40,4 +38,3 @@ class Login extends Component {
 }
 
 export default Login;
-

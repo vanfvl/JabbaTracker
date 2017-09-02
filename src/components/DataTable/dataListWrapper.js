@@ -13,4 +13,14 @@ export default class DataListWrapper {
       this._indexMap[index],
     );
   }
+
+  getArrayData() {
+    if (this.getSize() < 1) return false;
+
+    const returnArr = [];
+    for (let x = 0; x < this.getSize(); x++) {
+      returnArr.push(this.getObjectAt(x));
+    }
+    return returnArr;
+  }
 }

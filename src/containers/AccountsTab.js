@@ -1,8 +1,12 @@
 import React, {Component} from 'react';
 import {Route, IndexRoute} from 'react-router-dom';
 import firebase from '../firebase';
+import SortHeader from '../components/DataTable/sortHeader';
+import DataListWrapper from '../components/DataTable/dataListWrapper';
+import DataWrapper from '../components/DataTable/dataWrapper';
+import SortTypes from '../components/DataTable/sortTypes';
 
-class NewAccountInput extends Component {
+class AccountsTab extends Component {
   constructor(props) {
     super(props);
 
@@ -14,13 +18,84 @@ class NewAccountInput extends Component {
       accounts: [],
       selectedIds: [],
       editMode: false,
-      editId: ''
+      editId: '',
+      sortedDataList: new DataListWrapper([], []),
+      colSortDirs: [],
     };
+
+    this._dataList = {};
+    this._defaultSortIndexes = [];
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleEdit = this.toggleEdit.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+    this._onSortChange = this._onSortChange.bind(this);
+  }
+
+  componentDidMount() {
+    const accountsRef = firebase.database().ref('accounts');
+    accountsRef.on('value', (snapshot)=> {
+      let accounts = snapshot.val();
+      let newState = [];
+      for (let account in accounts) {
+        newState.push({
+          id: account,
+          accountName: accounts[account].accountName,
+          accountNumber: accounts[account].accountNumber,
+          clientName: accounts[account].clientName,
+          matterTitle: accounts[account].matterTitle
+        });
+      }
+      this.setState({
+        accounts: newState
+      }, () => {
+        this.initializeSortedList();
+      })
+    })
+  }
+
+  initializeSortedList() {
+    this._dataList = new DataWrapper(this.state.accounts);
+
+    this._defaultSortIndexes = [];
+    const size = this._dataList.getSize();
+    for (let index = 0; index < size; index++) {
+      this._defaultSortIndexes.push(index);
+    }
+
+    this.setState({
+      sortedDataList: new DataListWrapper(this._defaultSortIndexes, this._dataList),
+      colSortDirs: this._defaultSortIndexes,
+    })
+  }
+
+  _onSortChange(columnKey, sortDir) {
+    var sortIndexes = this._defaultSortIndexes.slice();
+    sortIndexes.sort((indexA, indexB) => {
+      var valueA = this._dataList.getObjectAt(indexA)[columnKey];
+      var valueB = this._dataList.getObjectAt(indexB)[columnKey];
+
+      var sortVal = 0;
+      if (valueA > valueB) {
+        sortVal = 1;
+      }
+      if (valueA < valueB) {
+        sortVal = -1;
+      }
+      if (sortVal !== 0 && sortDir === SortTypes.ASC) {
+        sortVal = sortVal * -1;
+      }
+
+      return sortVal;
+    });
+
+    this.setState({
+      sortedDataList: new DataListWrapper(sortIndexes, this._dataList),
+      colSortDirs: {
+        [columnKey]: sortDir,
+      },
+    });
   }
 
   //catch-all handleChange method that receives the event from
@@ -49,7 +124,6 @@ class NewAccountInput extends Component {
       clientName: '',
       matterTitle: ''
     });
-
   }
 
   handleEdit(e) {
@@ -61,27 +135,6 @@ class NewAccountInput extends Component {
       clientName: this.state.clientName,
       matterTitle: this.state.matterTitle
     }, this.toggleEdit);
-  }
-
-  componentDidMount() {
-    const accountsRef = firebase.database().ref('accounts');
-    accountsRef.on('value', (snapshot)=> {
-      let accounts = snapshot.val();
-      let newState = [];
-      for (let account in accounts) {
-        newState.push({
-          id: account,
-          accountName: accounts[account].accountName,
-          accountNumber: accounts[account].accountNumber,
-          clientName: accounts[account].clientName,
-          matterTitle: accounts[account].matterTitle
-
-        });
-      }
-      this.setState({
-        accounts: newState
-      })
-    })
   }
 
   removeItem(accountId) {
@@ -120,6 +173,8 @@ class NewAccountInput extends Component {
 
 
   render() {
+    const {sortedDataList, colSortDirs} = this.state;
+
     return (
       <div className="row">
         <div className="col-xs-12 col-sm-9">
@@ -138,14 +193,34 @@ class NewAccountInput extends Component {
               <thead>
               <tr>
                 <th>#</th>
-                <th>Account Name</th>
-                <th>Account Number</th>
-                <th>Client Name</th>
-                <th>Matter Title</th>
+                <SortHeader
+                  columnKey="accountName"
+                  onSortChange={this._onSortChange}
+                  sortDir={colSortDirs.accountName}>
+                  Account Name
+                </SortHeader>
+                <SortHeader
+                  columnKey="accountNumber"
+                  onSortChange={this._onSortChange}
+                  sortDir={colSortDirs.accountNumber}>
+                  Account Number
+                </SortHeader>
+                <SortHeader
+                  columnKey="clientName"
+                  onSortChange={this._onSortChange}
+                  sortDir={colSortDirs.clientName}>
+                  Client Name
+                </SortHeader>
+                <SortHeader
+                  columnKey="matterTitle"
+                  onSortChange={this._onSortChange}
+                  sortDir={colSortDirs.matterTitle}>
+                  Matter Title
+                </SortHeader>
               </tr>
               </thead>
               <tbody>
-              {this.state.accounts.map((account)=> {
+              {sortedDataList.getArrayData() && sortedDataList.getArrayData().map((account)=> {
                 return (
                   <tr key={account.id}>
                     <th><div className="checkbox">
@@ -220,4 +295,4 @@ class NewAccountInput extends Component {
   }
 }
 
-export default NewAccountInput;
+export default AccountsTab;
