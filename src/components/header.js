@@ -28,6 +28,9 @@ export default class Header extends Component {
               <li className={ this.props.location.pathname === '/accounts' && 'active' }>
                 <Link to="/accounts">Accounts</Link>
               </li>
+              <li className={ this.props.location.pathname === '/summary' && 'active' }>
+                <Link to="/summary">Summary</Link>
+              </li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li className="dropdown">

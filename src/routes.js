@@ -5,6 +5,7 @@ import Login from './containers/login';
 import TimeSheet from './containers/timesheet';
 import Input from './containers/input';
 import AccountsTab from './containers/AccountsTab';
+import SummaryTab from './containers/summary';
 
 export default () => (
   <div>
@@ -13,5 +14,6 @@ export default () => (
     <Route path="/timesheet" component={TimeSheet} />
     <Route path="/input" component={Input} />
     <Route path="/accounts" component={AccountsTab} />
+    <Route path="/summary" component={SummaryTab} />
   </div>
 )
