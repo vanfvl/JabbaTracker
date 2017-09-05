@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 import TableThemis from '../components/tablethemis';
 
 class ThemisSheet extends Component {

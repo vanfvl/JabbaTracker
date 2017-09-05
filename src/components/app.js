@@ -7,39 +7,43 @@ import ThemisSheet from '../containers/themissheet';
 import Input from '../containers/input';
 import AccountsTab from '../containers/AccountsTab';
 import Summary from '../containers/summary';
+import { isAuthenticated, auth, storageKey } from '../firebase';
 
-export default class Routes extends React.Component {
+export default class App extends React.Component {
+  state = {
+    uid: null
+  };
+
+  componentDidMount() {
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        window.localStorage.setItem(storageKey, user.uid);
+        this.setState({uid: user.uid});
+      } else {
+        window.localStorage.removeItem(storageKey);
+        this.setState({uid: null});
+      }
+    });
+  }
+
   render() {
     return (
       <div>
         <Header />
         <Route path="/login" component={Login}/>
-        <Route path="/" exact={true} component={TimeSheet}/>
-        <Route path="/themissheet" exact={true} component={ThemisSheet}/>
-        <Route path="/input" component={Input}/>
-        <Route path="/accounts" component={AccountsTab}/>
-        <Route path="/summary" component={Summary}/>
-        <ProtectedRoute path="/protected" component={TimeSheet} />
+        <ProtectedRoute path="/" exact={true} component={TimeSheet}/>
+        <ProtectedRoute path="/themissheet" exact={true} component={ThemisSheet}/>
+        <ProtectedRoute path="/input" component={Input}/>
+        <ProtectedRoute path="/accounts" component={AccountsTab}/>
+        <ProtectedRoute path="/summary" component={Summary}/>
       </div>
     )
   }
 }
 
-const fakeAuth = {
-  isAuthenticated: false,
-  authenticate(cb) {
-    this.isAuthenticated = true
-    setTimeout(cb, 100) // fake async
-  },
-  signout(cb) {
-    this.isAuthenticated = false
-    setTimeout(cb, 100)
-  }
-}
-
 const ProtectedRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => (
-    fakeAuth.isAuthenticated ? (
+    isAuthenticated() ? (
       <Component {...props}/>
     ) : (
       <Redirect to={{
@@ -48,4 +52,4 @@ const ProtectedRoute = ({ component: Component, ...rest }) => (
       }}/>
     )
   )}/>
-)
+);

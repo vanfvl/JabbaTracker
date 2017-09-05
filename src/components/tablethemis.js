@@ -6,7 +6,7 @@ import DataWrapper from './DataTable/dataWrapper';
 import SortHeaderCell from './DataTable/sortHeaderCell';
 import { TextCell } from './DataTable/cells';
 import moment from 'moment';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Snackbar from 'material-ui/Snackbar';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'

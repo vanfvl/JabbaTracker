@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Route, IndexRoute} from 'react-router-dom';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 import SortHeader from '../components/DataTable/sortHeader';
 import DataListWrapper from '../components/DataTable/dataListWrapper';
 import DataWrapper from '../components/DataTable/dataWrapper';

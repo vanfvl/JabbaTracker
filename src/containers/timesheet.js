@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 import TableTime from '../components/tabletime';
 
 class TimeSheet extends Component {

@@ -6,7 +6,7 @@ import DataWrapper from './DataTable/dataWrapper';
 import SortHeaderCell from './DataTable/sortHeaderCell';
 import { TextCell } from './DataTable/cells';
 import moment from 'moment';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 
 export default class TableTime extends Component {
   constructor(props) {

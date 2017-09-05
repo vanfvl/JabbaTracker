@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import firebase from '../firebase';
+import { firebase } from '../firebase';
 import Autocomplete from 'react-autocomplete';
 import { Link } from 'react-router-dom';
 

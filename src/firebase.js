@@ -1,4 +1,5 @@
-import firebase from 'firebase'
+import firebaseApp from 'firebase'
+
 const config = {
   apiKey: "AIzaSyB_4m1IAAXGg32T4wKfzgZyem_Bmt4CAJI",
   authDomain: "jabba-track.firebaseapp.com",
@@ -7,5 +8,15 @@ const config = {
   storageBucket: "jabba-track.appspot.com",
   messagingSenderId: "356648649902"
 };
-firebase.initializeApp(config);
-export default firebase;
+
+//the root app just in case we need it
+export const firebase = firebaseApp.initializeApp(config);
+
+export const db = firebase.database(); //the real-time database
+export const auth = firebase.auth(); //the firebase auth namespace
+
+export const storageKey = 'JABBA_TRACKER';
+
+export const isAuthenticated = () => {
+  return !!auth.currentUser || !!localStorage.getItem(storageKey);
+};
