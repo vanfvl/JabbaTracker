@@ -99,6 +99,20 @@ class Input extends Component {
     });
   }
 
+  handleChangeHour(idx, e) {
+    const {formValues} = this.state;
+
+    formValues[idx][e.target.name] = e.target.value;
+
+    if (e.target.value.length >= 2) {
+      e.target.parentNode.children[1].focus();
+    }
+
+    this.setState({
+      formValues
+    });
+  }
+
   handleReturn(e) {
     if (e.keyCode == '13') {
       this.handleSubmit();
@@ -225,7 +239,7 @@ class Input extends Component {
         </td>
         <td className={this.state.formValues[idx].errorTime && 'has-error'}>
           <input type="text" name="hour" className="form-control time" placeholder="00"
-                 value={this.state.formValues[idx].hour} onChange={(e) => this.handleChange(idx, e)}/>:
+                 value={this.state.formValues[idx].hour} onChange={(e) => this.handleChangeHour(idx, e)}/>:
           <input type="text" name="min" className="form-control time" placeholder="00"
                  value={this.state.formValues[idx].min} onChange={(e) => this.handleChange(idx, e)}/>
           { this.state.formValues[idx].errorTime &&
