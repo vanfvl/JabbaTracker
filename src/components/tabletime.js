@@ -182,6 +182,8 @@ export default class TableTime extends Component {
     const account = this.props.accounts[entry.account];
     if (!account) return false;
 
+    account.id = entry.account;
+
     this.setState({
       editItem: {
         entryId: entryId,
