@@ -286,6 +286,22 @@ export default class TableTime extends Component {
     return this.state.accounts.find((item) => item.accountName === accountName);
   }
 
+  filterTable(e) {
+    this._dataList = new DataWrapper(e.target.value ? this.props.entries.filter(entry => entry.account === e.target.value) : this.props.entries);
+
+    this._defaultSortIndexes = [];
+    var size = this._dataList.getSize();
+    for (var index = 0; index < size; index++) {
+      this._defaultSortIndexes.push(index);
+    }
+
+    this.setState({
+      sortedDataList: this._dataList,
+      colSortDirs: {},
+      selectedIds: []
+    });
+  }
+
   render() {
     const {sortedDataList, colSortDirs} = this.state;
 
@@ -349,6 +365,26 @@ export default class TableTime extends Component {
               >
                 View Not Logged
               </button>
+            </div>
+
+            <div className="btn-group form-inline" role="group">
+              Account Filter:
+              <select
+                className="form-control"
+                style={{marginLeft: 5}}
+                onChange={(e) => this.filterTable(e)}
+              >
+                <option value="">-- All --</option>
+                { this.state.accounts &&
+                  this.state.accounts.sort((a,b) => {
+                    if (a.accountName.toUpperCase() < b.accountName.toUpperCase()) return -1;
+                    if (a.accountName.toUpperCase() > b.accountName.toUpperCase()) return 1;
+                    return 0;
+                  }).map(account => (
+                    <option value={account.id} key={account.id}>{account.accountName}</option>
+                  ))
+                }
+              </select>
             </div>
           </div>
         </div>
