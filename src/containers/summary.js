@@ -30,9 +30,13 @@ class SummaryTab extends Component {
 
       if(entry.logged){
         summary.durationLogged += Number(entry.duration);
-      } else
-      summary.durationNotLogged += Number(entry.duration);
-      if (summary.dateLastLogged < entry.date) summary.dateLastLogged = entry.date;
+
+        if (Number(entry.logged) > 1) {
+          if (summary.dateLastLogged < entry.logged) summary.dateLastLogged = entry.logged;
+        }
+      } else {
+        summary.durationNotLogged += Number(entry.duration);
+      }
     });
 
     return (
@@ -51,7 +55,7 @@ class SummaryTab extends Component {
         </tr>
         <tr>
           <td><strong>Date Last Logged</strong></td>
-          <td>{moment(new Date(summary.dateLastLogged)).format('MMM D, YYYY - HH:MMa')}</td>
+          <td>{ summary.dateLastLogged ? moment(new Date(summary.dateLastLogged)).format('MMM D, YYYY - HH:MMa') : 'N/A' }</td>
         </tr>
       </tbody>
     )
@@ -73,13 +77,17 @@ class SummaryTab extends Component {
           };
 
           accountsTotal[entry.account].totalDuration += Number(entry.duration);
+
           if (entry.logged) {
             accountsTotal[entry.account].durationLogged += Number(entry.duration);
+
+            if (Number(entry.logged) > 1) {
+              if (accountsTotal[entry.account].dateLastLogged < entry.logged) {
+                accountsTotal[entry.account].dateLastLogged = entry.logged;
+              }
+            }
           } else {
             accountsTotal[entry.account].durationNotLogged += Number(entry.duration);
-          }
-          if (accountsTotal[entry.account].dateLastLogged < entry.date) {
-            accountsTotal[entry.account].dateLastLogged = entry.date;
           }
 
         }
@@ -93,7 +101,7 @@ class SummaryTab extends Component {
         <td>{parseFloat(Math.round(accountsTotal[entry].totalDuration * 100) / 100).toFixed(2)}</td>
         <td>{parseFloat(Math.round(accountsTotal[entry].durationLogged * 100) / 100).toFixed(2)}</td>
         <td>{parseFloat(Math.round(accountsTotal[entry].durationNotLogged * 100) / 100).toFixed(2)}</td>
-        <td>{moment(new Date(accountsTotal[entry].dateLastLogged)).format('MMM D, YYYY - HH:MMa')}</td>
+        <td>{ accountsTotal[entry].dateLastLogged ? moment(new Date(accountsTotal[entry].dateLastLogged)).format('MMM D, YYYY - HH:MMa') : 'N/A' }</td>
       </tr>);
     }
 

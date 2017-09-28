@@ -5,11 +5,12 @@
   "main": "index.js",
   "repository": "git@github.com:vanfvl/JabbaTracker.git",
   "scripts": {
-    "start": "node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --content-base public/",
+    "start": "node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --content-base public/ --port 8081",
     "test": "mocha --compilers js:babel-core/register --require ./test/test_helper.js --recursive ./test",
     "test:watch": "npm run test -- --watch",
     "build": "webpack -p",
-    "deploy": "webpack -p && firebase deploy"
+    "deploy": "webpack -p && firebase deploy",
+    "backup": "firebase database:get /users > backup/users-${DATE}.json && firebase database:get /entries > backup/entries-${DATE}.json && firebase database:get /accounts > backup/accounts-${DATE}.json && firebase auth:export backup/auth-${DATE}.json"
   },
   "author": "Vanni Lammoglia",
   "license": "ISC",

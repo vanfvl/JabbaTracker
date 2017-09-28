@@ -130,7 +130,7 @@ export default class TableThemis extends Component {
           date: entry.date,
           description: entry.description,
           duration: entry.duration,
-          logged
+          logged: logged ? new Date().getTime() : false
         });
       }
     });
