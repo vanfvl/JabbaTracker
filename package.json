@@ -44,6 +44,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "redux": "^3.0.4",
-    "styled-jsx": "^1.0.10"
+    "styled-jsx": "^1.0.10",
+    "zipcelx": "^1.2.0"
   }
 }

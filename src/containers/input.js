@@ -3,7 +3,7 @@ import { firebase } from '../firebase';
 import Autocomplete from 'react-autocomplete';
 import { Link } from 'react-router-dom';
 
-const NUMBER_OF_ROWS = 10;
+const NUMBER_OF_ROWS = 20;
 
 class Input extends Component {
   constructor(props) {
