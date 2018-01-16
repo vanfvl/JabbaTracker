@@ -9,6 +9,16 @@ const config = {
   messagingSenderId: "356648649902"
 };
 
+// DEV
+// const config = {
+// 	apiKey: "AIzaSyA9wrp-hd532iXWPHSLV91rUULREJ_H-I8",
+// 	authDomain: "jabba-track-dev.firebaseapp.com",
+// 	databaseURL: "https://jabba-track-dev.firebaseio.com",
+// 	projectId: "jabba-track-dev",
+// 	storageBucket: "jabba-track-dev.appspot.com",
+// 	messagingSenderId: "379893650268"
+// };
+
 //the root app just in case we need it
 export const firebase = firebaseApp.initializeApp(config);
 

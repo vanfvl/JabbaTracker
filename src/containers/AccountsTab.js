@@ -5,6 +5,9 @@ import SortHeader from '../components/DataTable/sortHeader';
 import DataListWrapper from '../components/DataTable/dataListWrapper';
 import DataWrapper from '../components/DataTable/dataWrapper';
 import SortTypes from '../components/DataTable/sortTypes';
+import zipcelx from 'zipcelx';
+import moment from "moment/moment";
+import _ from 'lodash';
 
 class AccountsTab extends Component {
   constructor(props) {
@@ -21,6 +24,7 @@ class AccountsTab extends Component {
       editId: '',
       sortedDataList: new DataListWrapper([], []),
       colSortDirs: [],
+	    entries: [],
     };
 
     this._dataList = {};
@@ -31,11 +35,13 @@ class AccountsTab extends Component {
     this.toggleEdit = this.toggleEdit.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this._onSortChange = this._onSortChange.bind(this);
+
+	  this.entriesRef = firebase.database().ref('entries');
+	  this.accountsRef = firebase.database().ref('accounts');
   }
 
   componentDidMount() {
-    const accountsRef = firebase.database().ref('accounts');
-    accountsRef.on('value', (snapshot)=> {
+    this.accountsRef.on('value', (snapshot)=> {
       let accounts = snapshot.val();
       let newState = [];
       for (let account in accounts) {
@@ -52,7 +58,30 @@ class AccountsTab extends Component {
       }, () => {
         this.initializeSortedList();
       })
-    })
+    });
+
+	  this.entriesRef.on('value', (snapshot) => {
+		  const items = snapshot.val();
+		  let entries = [];
+		  const { accounts } = this.state;
+
+		  for (let key in items) {
+			  let item = {
+				  id: key,
+				  ...items[key],
+			  };
+
+			  if (accounts[items[key].account]) {
+				  item.accountNumber = accounts[items[key].account].accountNumber;
+				  item.clientName = accounts[items[key].account].clientName;
+				  item.matterTitle = accounts[items[key].account].matterTitle;
+			  }
+
+			  entries.push(item);
+		  }
+
+		  this.setState({entries});
+	  });
   }
 
   initializeSortedList() {
@@ -171,6 +200,46 @@ class AccountsTab extends Component {
     });
   }
 
+	downloadXLSX(accountId) {
+    const { accounts, entries } = this.state;
+    const account = _.find( accounts, account => account.id === accountId );
+
+    if (!account) return false;
+
+		const config = {
+			filename: `Account-${account.accountNumber}`,
+			sheet: {
+				data: [
+				  [
+					  { value: account.accountNumber, type: 'string' },
+          ],
+					[
+						{ value: 'Date', type: 'string' },
+						{ value: 'Time Start', type: 'string' },
+						{ value: 'Time Spent', type: 'string' },
+						{ value: 'Description', type: 'string' },
+					],
+				]
+			}
+		};
+
+		const accountEntries = [];
+
+		entries.forEach(entry => {
+			if (entry.account === accountId) accountEntries.push(entry);
+    });
+
+		entries.forEach(data => {
+			config.sheet.data.push([
+				{ value: moment(new Date(data.date)).format('MMM D, YYYY'), type: 'string' },
+				{ value: moment(new Date(data.date)).format('h:mma'), type: 'string' },
+				{ value: data.duration, type: 'string' },
+				{ value: data.description, type: 'string' },
+			]);
+		});
+
+		zipcelx(config);
+	}
 
   render() {
     const {sortedDataList, colSortDirs} = this.state;
@@ -188,6 +257,17 @@ class AccountsTab extends Component {
                 this.setState({selectedIds:[]})
 
               }}>Delete</button>
+              <button
+                type="button"
+                className="btn btn-default"
+                onClick={() => {
+                  if (this.state.selectedIds.length > 0) {
+                    this.state.selectedIds.forEach(id => this.downloadXLSX(id));
+                  }
+                }}
+              >
+                Download as XLSX
+              </button>
             </div>
             <table className="table table-bordered">
               <thead>

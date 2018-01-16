@@ -9,7 +9,8 @@ import moment from 'moment';
 import { firebase } from '../firebase';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Snackbar from 'material-ui/Snackbar';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import zipcelx from 'zipcelx';
 
 export default class TableThemis extends Component {
   constructor(props) {
@@ -170,6 +171,41 @@ export default class TableThemis extends Component {
     });
   }
 
+	downloadXLSX() {
+		const config = {
+			filename: 'timesheet',
+			sheet: {
+				data: [
+					[
+					  { value: 'Account #', type: 'string' },
+					  { value: 'Matter Title', type: 'string' },
+					  { value: 'Date', type: 'string' },
+					  { value: 'Time', type: 'string' },
+					  { value: 'Duration', type: 'string' },
+					  { value: 'Description', type: 'string' },
+					  { value: 'Status', type: 'string' },
+          ],
+				]
+			}
+		};
+
+		const { sortedDataList } = this.state;
+
+		sortedDataList._data.forEach(data => {
+		  config.sheet.data.push([
+			  { value: data.accountNumber, type: 'string' },
+			  { value: data.matterTitle, type: 'string' },
+			  { value: moment(new Date(data.date)).format('MMM D, YYYY'), type: 'string' },
+			  { value: moment(new Date(data.date)).format('h:mma'), type: 'string' },
+			  { value: data.duration, type: 'string' },
+			  { value: data.description, type: 'string' },
+			  { value: data.logged ? 'Logged' : 'Not Logged', type: 'string' },
+		  ]);
+    });
+
+		zipcelx(config);
+  }
+
   render() {
     var {sortedDataList, colSortDirs} = this.state;
     return (
@@ -227,6 +263,15 @@ export default class TableThemis extends Component {
                 }
               </select>
             </div>
+	          <div className="btn-group" role="group">
+		          <button
+			          type="button"
+			          className="btn btn-default"
+			          onClick={() => this.downloadXLSX()}
+		          >
+			          Download as XLSX
+		          </button>
+	          </div>
           </div>
         </div>
 
