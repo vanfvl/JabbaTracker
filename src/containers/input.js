@@ -1,52 +1,51 @@
-import React, {Component} from 'react';
-import { firebase } from '../firebase';
-import Autocomplete from 'react-autocomplete';
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react'
+import { firebase } from '../firebase'
+import Autocomplete from 'react-autocomplete'
+import { Link } from 'react-router-dom'
 
-const NUMBER_OF_ROWS = 20;
+const NUMBER_OF_ROWS = 20
 
 class Input extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       formValues: [],
       accounts: [],
       submitted: false,
-    };
+      selectedRow: null
+    }
 
-    this.entriesRef = firebase.database().ref('entries');
-    this.accountsRef = firebase.database().ref('accounts');
+    this.entriesRef = firebase.database().ref('entries')
+    this.accountsRef = firebase.database().ref('accounts')
   }
 
   componentDidMount() {
     this.accountsRef.on('value', (snapshot) => {
-      const items = snapshot.val();
-      const accounts = [];
+      const items = snapshot.val()
+      const accounts = []
 
       for (let key in items) {
         let item = {
           id: key,
-          ...items[key],
-        };
+          ...items[key]
+        }
 
-        accounts.push(item);
+        accounts.push(item)
       }
 
-      this.setState({accounts});
-    });
+      this.setState({ accounts })
+    })
 
-    this.resetFormValues();
+    this.resetFormValues()
   }
 
   componentWillUnmount() {
-    this.accountsRef.off();
+    this.accountsRef.off()
   }
 
   matchStateToTerm(item, value) {
-    return (
-      item.accountName.toLowerCase().indexOf(value.toLowerCase()) !== -1
-    )
+    return item.accountName.toLowerCase().indexOf(value.toLowerCase()) !== -1
   }
 
   sortResults(a, b, value) {
@@ -62,12 +61,12 @@ class Input extends Component {
   }
 
   resetFormValues() {
-    const formValues = [];
+    const formValues = []
 
     for (let i = 0; i < NUMBER_OF_ROWS; i++) {
       formValues.push({
         year: new Date().getFullYear(),
-        month: (new Date().getMonth() + 1),
+        month: new Date().getMonth() + 1,
         day: new Date().getDate(),
         errorDate: '',
         accountName: '',
@@ -80,197 +79,292 @@ class Input extends Component {
         duration2: '',
         errorDuration: '',
         description: '',
-        errorDescription: '',
+        errorDescription: ''
       })
     }
 
     this.setState({
-      formValues,
+      formValues
     })
   }
 
   handleChange(idx, e) {
-    const {formValues} = this.state;
+    const { formValues } = this.state
 
-    formValues[idx][e.target.name] = e.target.value;
+    formValues[idx][e.target.name] = e.target.value
 
     this.setState({
       formValues
-    });
+    })
   }
 
   handleChangeHour(idx, e) {
-    const {formValues} = this.state;
+    const { formValues } = this.state
 
-    formValues[idx][e.target.name] = e.target.value;
+    formValues[idx][e.target.name] = e.target.value
 
     if (e.target.value.length >= 2) {
-      e.target.parentNode.children[1].focus();
+      e.target.parentNode.children[1].focus()
     }
 
     this.setState({
       formValues
-    });
+    })
   }
 
   handleReturn(e) {
     if (e.keyCode == '13') {
-      this.handleSubmit();
+      this.handleSubmit()
     }
   }
 
   findAccountByName(accountName) {
-    return this.state.accounts.find((item) => item.accountName === accountName);
+    return this.state.accounts.find((item) => item.accountName === accountName)
   }
 
   handleSubmit() {
-    const entriesToPush = [];
-    const { formValues } = this.state;
-    let hasError = false;
+    const entriesToPush = []
+    const { formValues } = this.state
+    let hasError = false
 
-    formValues.forEach(item => {
-      item.errorDate = '';
-      item.errorAccountName = '';
-      item.errorTime = '';
-      item.errorDuration = '';
-      item.errorDescription = '';
+    formValues.forEach((item) => {
+      item.errorDate = ''
+      item.errorAccountName = ''
+      item.errorTime = ''
+      item.errorDuration = ''
+      item.errorDescription = ''
 
-      if ( !item.account &&
-        item.hour === '' &&
-        item.min === '' &&
-        item.duration1 === '' &&
-        item.description === '' ) {
-        return false;
+      if (item.hour === '' && item.min === '' && item.duration1 === '' && item.description === '') {
+        return false
       }
 
-      if ( item.month === '' || item.day === '' ) {
-        item.errorDate = 'Please enter a valid date.';
-        hasError = true;
+      if (item.month === '' || item.day === '') {
+        item.errorDate = 'Please enter a valid date.'
+        hasError = true
       }
 
-      if ( !item.account ) {
-        item.errorAccountName = 'Please select a valid account.';
-        hasError = true;
+      if (!item.account) {
+        item.errorAccountName = 'Please select a valid account.'
+        hasError = true
       }
 
-      if ( item.hour === '' || item.min === '' ) {
-        item.errorTime = 'Please enter a valid time.';
-        hasError = true;
+      if (item.hour === '' || item.min === '') {
+        item.errorTime = 'Please enter a valid time.'
+        hasError = true
       }
 
-      if ( item.duration1 === '' && item.duration2 === '' ) {
-        item.errorDuration = 'Please enter a valid duration.';
-        hasError = true;
+      if (item.duration1 === '' && item.duration2 === '') {
+        item.errorDuration = 'Please enter a valid duration.'
+        hasError = true
       }
 
-      if ( item.description === '' ) {
-        item.errorDescription = 'Please enter a description.';
-        hasError = true;
+      if (item.description === '') {
+        item.errorDescription = 'Please enter a description.'
+        hasError = true
       }
 
-      if (hasError) return false;
+      if (hasError) return false
 
       const entry = {
         account: item.account.id,
-        date: new Date(item.year || '2017', item.month - 1, item.day, item.hour, item.min).getTime(),
+        date: new Date(
+          item.year || '2017',
+          item.month - 1,
+          item.day,
+          item.hour,
+          item.min
+        ).getTime(),
         description: item.description,
         duration: `${item.duration1 || 0}.${item.duration2 || 0}`,
         logged: false
-      };
+      }
 
-      entriesToPush.push(entry);
-    });
+      entriesToPush.push(entry)
+    })
 
     if (hasError) {
-      this.setState({formValues});
-      return false;
+      this.setState({ formValues })
+      return false
     }
 
     if (entriesToPush.length > 0) {
-      entriesToPush.forEach(entry => this.entriesRef.push(entry));
-      this.setState({submitted: true});
-      this.resetFormValues();
+      entriesToPush.forEach((entry) => this.entriesRef.push(entry))
+      this.setState({ submitted: true })
+      this.resetFormValues()
     }
   }
 
   renderRows() {
     const changeAccount = (value, idx) => {
-      const {formValues} = this.state;
+      const { formValues } = this.state
 
-      formValues[idx].accountName = value;
-      formValues[idx].account = this.findAccountByName(value);
+      formValues[idx].accountName = value
+      formValues[idx].account = this.findAccountByName(value)
 
-      return formValues;
-    };
+      return formValues
+    }
+
+    const { selectedRow } = this.state
 
     return this.state.formValues.map((row, idx) => (
       <tr key={idx}>
-        <td className={this.state.formValues[idx].errorDate && 'has-error'}>
-          <input type="text" name="year" className="form-control year" placeholder="2017"
-                 value={this.state.formValues[idx].year} onChange={(e) => this.handleChange(idx, e)}/>
-          <input type="text" name="month" className="form-control month" placeholder="MM"
-                 value={this.state.formValues[idx].month} onChange={(e) => this.handleChange(idx, e)}/>
-          <input type="text" name="day" className="form-control day" placeholder="DD"
-                 value={this.state.formValues[idx].day} onChange={(e) => this.handleChange(idx, e)}/>
-          { this.state.formValues[idx].errorDate &&
-            <span className="help-block">{this.state.formValues[idx].errorDate}</span>
-          }
-        </td>
-        <td className={this.state.formValues[idx].errorAccountName && 'has-error'}>
+        <td
+          className={this.state.formValues[idx].errorAccountName && 'has-error'}
+          style={{ display: 'flex', gap: '0.5em' }}
+        >
           <Autocomplete
             getItemValue={(item) => item.accountName}
-            inputProps={{className: 'form-control'}}
-            wrapperStyle={{width: '100%', display: 'inline-block'}}
+            inputProps={{ className: 'form-control' }}
+            wrapperStyle={{ width: '100%', display: 'inline-block' }}
             items={this.state.accounts}
-            renderItem={(item, isHighlighted) =>
-              <div style={{background: isHighlighted ? 'lightgray' : 'white'}}>
-                { item.accountName }
+            renderItem={(item, isHighlighted) => (
+              <div style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
+                {item.accountName}
               </div>
-            }
+            )}
             value={this.state.formValues[idx].accountName}
             shouldItemRender={this.matchStateToTerm}
             sortItems={this.sortResults}
-            onChange={(e, value) => this.setState({formValues: changeAccount(value, idx)}) }
-            onSelect={(value) => this.setState({formValues: changeAccount(value, idx)}) }
+            onChange={(e, value) => this.setState({ formValues: changeAccount(value, idx) })}
+            onSelect={(value) => this.setState({ formValues: changeAccount(value, idx) })}
           />
-          { this.state.formValues[idx].errorAccountName &&
-          <span className="help-block">{this.state.formValues[idx].errorAccountName}</span>
-          }
+          {this.state.formValues[idx].account && (
+            <button
+              type="button"
+              onClick={() => {
+                const { formValues } = this.state
+                formValues[idx].accountName = ''
+                formValues[idx].account = null
+
+                this.setState({
+                  formValues
+                })
+              }}
+            >
+              <img src="/delete.png" alt="delete" style={{ width: '20px' }} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              const { formValues } = this.state
+              for (let i = idx + 1; i < NUMBER_OF_ROWS; i++) {
+                formValues[i].accountName = formValues[idx].accountName
+                formValues[i].account = formValues[idx].account
+              }
+
+              this.setState({
+                formValues
+              })
+            }}
+          >
+            <img src="/copy.png" alt="copy" style={{ width: '20px' }} />
+          </button>
+          {this.state.formValues[idx].errorAccountName && (
+            <span className="help-block">{this.state.formValues[idx].errorAccountName}</span>
+          )}
+        </td>
+        <td className={this.state.formValues[idx].errorDate && 'has-error'}>
+          <input
+            type="text"
+            name="year"
+            className="form-control year"
+            placeholder="2017"
+            value={this.state.formValues[idx].year}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+          <input
+            type="text"
+            name="month"
+            className="form-control month"
+            placeholder="MM"
+            value={this.state.formValues[idx].month}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+          <input
+            type="text"
+            name="day"
+            className="form-control day"
+            placeholder="DD"
+            value={this.state.formValues[idx].day}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+
+          {this.state.formValues[idx].errorDate && (
+            <span className="help-block">{this.state.formValues[idx].errorDate}</span>
+          )}
         </td>
         <td className={this.state.formValues[idx].errorTime && 'has-error'}>
-          <input type="text" name="hour" className="form-control time" placeholder="00"
-                 value={this.state.formValues[idx].hour} onChange={(e) => this.handleChangeHour(idx, e)}/>:
-          <input type="text" name="min" className="form-control time" placeholder="00"
-                 value={this.state.formValues[idx].min} onChange={(e) => this.handleChange(idx, e)}/>
-          { this.state.formValues[idx].errorTime &&
-          <span className="help-block">{this.state.formValues[idx].errorTime}</span>
-          }
+          <input
+            type="text"
+            name="hour"
+            className="form-control time"
+            placeholder="00"
+            value={this.state.formValues[idx].hour}
+            onChange={(e) => this.handleChangeHour(idx, e)}
+          />
+          :
+          <input
+            type="text"
+            name="min"
+            className="form-control time"
+            placeholder="00"
+            value={this.state.formValues[idx].min}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+          {this.state.formValues[idx].errorTime && (
+            <span className="help-block">{this.state.formValues[idx].errorTime}</span>
+          )}
         </td>
         <td className={this.state.formValues[idx].errorDuration && 'has-error'}>
-          <input type="text" name="duration1" className="form-control duration" placeholder="0"
-                 value={this.state.formValues[idx].duration1} onChange={(e) => this.handleChange(idx, e)}/>.
-          <input type="text" name="duration2" className="form-control duration" placeholder="00"
-                 value={this.state.formValues[idx].duration2} onChange={(e) => this.handleChange(idx, e)}/>
-          { this.state.formValues[idx].errorDuration &&
-          <span className="help-block">{this.state.formValues[idx].errorDuration}</span>
-          }
+          <input
+            type="text"
+            name="duration1"
+            className="form-control duration"
+            placeholder="0"
+            value={this.state.formValues[idx].duration1}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+          .
+          <input
+            type="text"
+            name="duration2"
+            className="form-control duration"
+            placeholder="00"
+            value={this.state.formValues[idx].duration2}
+            onChange={(e) => this.handleChange(idx, e)}
+          />
+          {this.state.formValues[idx].errorDuration && (
+            <span className="help-block">{this.state.formValues[idx].errorDuration}</span>
+          )}
         </td>
         <td className={this.state.formValues[idx].errorDescription && 'has-error'}>
-          <input type="text" name="description" className="form-control description" placeholder="Description"
-                 value={this.state.formValues[idx].description} onChange={(e) => this.handleChange(idx, e)} onKeyDown={(e) => this.handleReturn(e)} />
-          { this.state.formValues[idx].errorDescription &&
-          <span className="help-block">{this.state.formValues[idx].errorDescription}</span>
-          }
+          <input
+            type="text"
+            name="description"
+            className="form-control description"
+            placeholder="Description"
+            value={this.state.formValues[idx].description}
+            onChange={(e) => this.handleChange(idx, e)}
+            onKeyDown={(e) => this.handleReturn(e)}
+          />
+          {this.state.formValues[idx].errorDescription && (
+            <span className="help-block">{this.state.formValues[idx].errorDescription}</span>
+          )}
         </td>
 
         <style jsx>{`
-          input { display: inline-block; }
-          .time, .duration {
+          input {
+            display: inline-block;
+          }
+          .time,
+          .duration {
             width: 48%;
             text-align: right;
           }
 
-          .time:last-child, .duration:last-child {
+          .time:last-child,
+          .duration:last-child {
             margin-right: 0;
             text-align: left;
           }
@@ -291,43 +385,50 @@ class Input extends Component {
           }
         `}</style>
       </tr>
-    ));
+    ))
   }
 
   render() {
     return (
       <div>
-        <button className="btn btn-success" onClick={() => this.handleSubmit()}>Submit</button>
+        <button className="btn btn-success" onClick={() => this.handleSubmit()}>
+          Submit
+        </button>
 
         <table className="table">
           <thead>
-          <tr>
-            <th width="190">Date</th>
-            <th>Account Name</th>
-            <th width="120">Time</th>
-            <th width="120">Duration</th>
-            <th>Description</th>
-          </tr>
+            <tr>
+              <th>Account Name</th>
+              <th width="190">Date</th>
+              <th width="120">Time</th>
+              <th width="120">Duration</th>
+              <th>Description</th>
+            </tr>
           </thead>
-          <tbody>
-          { this.renderRows() }
-          </tbody>
+          <tbody>{this.renderRows()}</tbody>
         </table>
 
-        <button className="btn btn-success" onClick={() => this.handleSubmit()}>Submit</button>
+        <button className="btn btn-success" onClick={() => this.handleSubmit()}>
+          Submit
+        </button>
 
-        { this.state.submitted &&
+        {this.state.submitted && (
           <div className="bg-success">
-            <strong>Success!</strong> Please <Link to="/">click here</Link> to go to the Time Sheet tab.
+            <strong>Success!</strong> Please <Link to="/">click here</Link> to go to the Time Sheet
+            tab.
           </div>
-        }
+        )}
 
         <style jsx>{`
-          .bg-success { padding: 10px; margin-left: 1em; display: inline-block; }
+          .bg-success {
+            padding: 10px;
+            margin-left: 1em;
+            display: inline-block;
+          }
         `}</style>
       </div>
     )
   }
 }
 
-export default Input;
+export default Input
