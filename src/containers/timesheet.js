@@ -28,10 +28,14 @@ class TimeSheet extends Component {
         };
 
         if (accounts[items[key].account]) {
-          item.accountName = accounts[items[key].account].accountName;
-          item.accountNumber = accounts[items[key].account].accountNumber;
-          item.clientName = accounts[items[key].account].clientName;
-          item.matterTitle = accounts[items[key].account].matterTitle;
+          try {
+            item.accountName = accounts[items[key].account].accountName;
+            item.accountNumber = accounts[items[key].account].accountNumber;
+            item.clientName = accounts[items[key].account].clientName;
+            item.matterTitle = accounts[items[key].account].matterTitle;
+          } catch(e) {
+            console.log(e);
+          }
         }
 
         entries.push(item);
@@ -47,13 +51,17 @@ class TimeSheet extends Component {
       let newEntries = [];
 
       entries.forEach(item => {
-        newEntries.push({
-          ...item,
-          accountNumber: accounts[item.account].accountNumber,
-          clientName: accounts[item.account].clientName,
-          accountName: accounts[item.account].accountName,
-          matterTitle: accounts[item.account].matterTitle,
-        })
+        try {
+          newEntries.push({
+            ...item,
+            accountNumber: accounts[item.account] ? accounts[item.account].accountNumber : undefined,
+            clientName: accounts[item.account] ? accounts[item.account].clientName : undefined,
+            accountName: accounts[item.account] ? accounts[item.account].accountName : undefined,
+            matterTitle: accounts[item.account] ? accounts[item.account].matterTitle : undefined,
+          })
+        } catch(e) {
+          console.log(item, e);
+        }
       });
 
       if (newEntries.length > 0)

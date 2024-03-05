@@ -28,9 +28,13 @@ class ThemisSheet extends Component {
         };
 
         if (accounts[items[key].account]) {
-          item.accountNumber = accounts[items[key].account].accountNumber;
-          item.clientName = accounts[items[key].account].clientName;
-          item.matterTitle = accounts[items[key].account].matterTitle;
+          try {
+            item.accountNumber = accounts[items[key].account].accountNumber;
+            item.clientName = accounts[items[key].account].clientName;
+            item.matterTitle = accounts[items[key].account].matterTitle;
+          } catch(e) {
+            console.log(e);
+          }
         }
 
         entries.push(item);
@@ -46,12 +50,16 @@ class ThemisSheet extends Component {
       let newEntries = [];
 
       entries.forEach(item => {
-        newEntries.push({
-          ...item,
-          accountNumber: accounts[item.account].accountNumber,
-          clientName: accounts[item.account].clientName,
-          matterTitle: accounts[item.account].matterTitle,
-        })
+        try {
+          newEntries.push({
+            ...item,
+            accountNumber: accounts[item.account].accountNumber,
+            clientName: accounts[item.account].clientName,
+            matterTitle: accounts[item.account].matterTitle,
+          })
+        } catch(e) {
+          console.log(e);
+        }
       });
 
       if (newEntries.length > 0)
