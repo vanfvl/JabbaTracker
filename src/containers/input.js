@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { firebase } from '../firebase'
 import Autocomplete from 'react-autocomplete'
-import { Link } from 'react-router-dom'
+import { Link, Prompt } from 'react-router-dom'
 
 const NUMBER_OF_ROWS = 20
 
@@ -13,7 +13,8 @@ class Input extends Component {
       formValues: [],
       accounts: [],
       submitted: false,
-      selectedRow: null
+      selectedRow: null,
+      hasUnsavedChanges: false
     }
 
     this.entriesRef = firebase.database().ref('entries')
@@ -21,6 +22,13 @@ class Input extends Component {
   }
 
   componentDidMount() {
+    window.onbeforeunload = (e) => {
+      if (this.state.hasUnsavedChanges) {
+        e.preventDefault()
+        return 'You have unsaved changes. Are you sure you want to leave?'
+      }
+    }
+
     this.accountsRef.on('value', (snapshot) => {
       const items = snapshot.val()
       const accounts = []
@@ -42,6 +50,7 @@ class Input extends Component {
 
   componentWillUnmount() {
     this.accountsRef.off()
+    window.onbeforeunload = null
   }
 
   matchStateToTerm(item, value) {
@@ -94,7 +103,8 @@ class Input extends Component {
     formValues[idx][e.target.name] = e.target.value
 
     this.setState({
-      formValues
+      formValues,
+      hasUnsavedChanges: true
     })
   }
 
@@ -189,7 +199,7 @@ class Input extends Component {
 
     if (entriesToPush.length > 0) {
       entriesToPush.forEach((entry) => this.entriesRef.push(entry))
-      this.setState({ submitted: true })
+      this.setState({ submitted: true, hasUnsavedChanges: false })
       this.resetFormValues()
     }
   }
@@ -225,8 +235,12 @@ class Input extends Component {
             value={this.state.formValues[idx].accountName}
             shouldItemRender={this.matchStateToTerm}
             sortItems={this.sortResults}
-            onChange={(e, value) => this.setState({ formValues: changeAccount(value, idx) })}
-            onSelect={(value) => this.setState({ formValues: changeAccount(value, idx) })}
+            onChange={(e, value) =>
+              this.setState({ formValues: changeAccount(value, idx), hasUnsavedChanges: true })
+            }
+            onSelect={(value) =>
+              this.setState({ formValues: changeAccount(value, idx), hasUnsavedChanges: true })
+            }
           />
           {this.state.formValues[idx].account && (
             <button
@@ -391,6 +405,11 @@ class Input extends Component {
   render() {
     return (
       <div>
+        <Prompt
+          when={this.state.hasUnsavedChanges}
+          message="You have unsaved changes. Are you sure you want to leave?"
+        />
+
         <button className="btn btn-success" onClick={() => this.handleSubmit()}>
           Submit
         </button>
